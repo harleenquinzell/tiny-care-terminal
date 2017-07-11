@@ -45,8 +45,26 @@ tweetBoxes[config.twitter[1]] = grid.set(2, 8, 2, 4, blessed.box, makeBox(' 💖
 tweetBoxes[config.twitter[2]] = grid.set(4, 8, 2, 4, blessed.box, makeBox(' 💬 '));
 
 if (pomodoro_is_active) {
-  var pomodoroBox = grid.set(6, 10, 2, 2, blessed.box, makeScrollBox(' 🍅 '));
-  var pomodoroStatsBox = grid.set(8, 10, 4, 2, contrib.bar, makeGraphBox('Pomodoros', 4));
+  var pomodoroBox = grid.set(6, 10, 3, 2, contrib.donut, {
+    label: ' 🍅 ',
+    tags: true,
+    scrollable: false,
+    border: {
+      type: 'line'
+    },
+    style: {
+      fg: 'white',
+      border: {fg: 'cyan'},
+      hover: {border: {fg: 'green'}}
+    },
+    radius: 10,
+    arcWidth: 4,
+    yPadding: 8,
+    remainColor: 'black',
+    data: [{percent: 100, label: 'test', color: 'cyan'}]
+  });
+
+  var pomodoroStatsBox = grid.set(9, 10, 3, 2, contrib.bar, makeGraphBox('Pomodoros', 3));
 
   var parrotBox = grid.set(6, 6, 6, 4, blessed.box, makeScrollBox(''));
 } else {

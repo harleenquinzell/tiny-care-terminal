@@ -9,9 +9,14 @@ const store = require('piggy-bank')(
 function init(box, screen, statsBox) {
   const default_focus_time = config.pomodoro.default_focus_time;
   const default_break_time = config.pomodoro.default_break_time;
+  const default_msg = '\nPress s to start and stop a session.';
   let timer;
 
-  box.content = defaultMsg();
+  box.setData([{
+    percent: 100,
+    label: default_msg
+  }]);
+
   refreshPomodoroStats();
 
   function start() {
@@ -32,21 +37,31 @@ function init(box, screen, statsBox) {
 
       incrementTodaysCount();
 
-      timer.finish(function() {
+      timer.finish(function({percentDone}) {
         notifier.notify({
           title: '🍅  Pomodoro Timer',
           message: 'Break is over. Ready for another session?',
           sound: true
         });
-        box.content = defaultMsg();
+
+        box.setData([{
+          percent: 100,
+          label: default_msg
+        }]);
         screen.render();
       });
     });
   }
 
   function updateTimer(emoji, timer, msg) {
-    timer.ticker(function({formattedTime}) {
-      box.content = ` ${emoji}  ${formattedTime} - ${msg}`;
+    timer.ticker(function({formattedTime, percentDone}) {
+      text = ` ${emoji}  ${formattedTime} \n ${msg}`;
+
+      box.setData([{
+        percent: 100-percentDone,
+        label: text
+      }]);
+
       screen.render();
     });
   }
@@ -81,14 +96,6 @@ function init(box, screen, statsBox) {
     return weekPomodoros;
   }
 
-  function defaultMsg() {
-    const today = getToday();
-    let default_msg = 'Press s to start and stop a session.'
-    if (store.get(today) > 0) {
-      default_msg += `\nYou have completed ${store.get(today)} pomodoros today. Hooray!`
-    }
-    return default_msg;
-  }
 
   function isRunning() {
     return timer && timer.isRunning();
@@ -97,7 +104,10 @@ function init(box, screen, statsBox) {
   function stop() {
     if (timer) {
       timer.stop();
-      box.content = ` ⏰  Session stopped. \n${defaultMsg()}`;
+      box.setData([{
+        percent: 100,
+        label: `Session stopped. \n ${default_msg}`
+      }]);
       screen.render();
     }
   }
